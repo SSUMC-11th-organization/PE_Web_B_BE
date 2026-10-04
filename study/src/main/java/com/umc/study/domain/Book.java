@@ -28,6 +28,14 @@ public class Book {
     @Column(name = "is_available")
     private boolean available;
 
+    // 신규 도서는 대여 가능 상태로 등록됩니다.
+    public Book(Category category, String title, String description) {
+        this.category = category;
+        this.title = title;
+        this.description = description;
+        this.available = true;
+    }
+
     public String getCategoryName() {
         return category == null ? null : category.getName();
     }
