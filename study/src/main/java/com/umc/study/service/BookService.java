@@ -1,9 +1,12 @@
 // src/main/java/.../service/BookService.java
 package com.umc.study.service;
 
+import com.umc.study.dto.BookResponse;
+import com.umc.study.repository.BookJdbcRepository;
 import com.umc.study.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -14,18 +17,21 @@ public class BookService {
 
     // 창고지기(Repository)를 생성자 주입으로 데려옵니다.
     private final BookRepository bookRepository;
+    private final BookJdbcRepository bookJdbcRepository;
 
-    public List<Map<String, Object>> getAllBooks() {
-        // 지금은 별도 가공 없이 창고지기가 가져온 도서 목록을 그대로 반환합니다.
-        return bookRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<BookResponse> getBooks() {
+        // 엔티티 목록을 응답 DTO로 변환합니다.
+        return bookRepository.findAllByOrderByBookIdDesc().stream()
+                .map(BookResponse::from)
+                .toList();
     }
 
-    // BookService.java에 추가
     public void createBook(Map<String, Object> body){
-        bookRepository.save(body);
+        bookJdbcRepository.save(body);
     }
 
     public List<Map<String, Object>> getBooksByCategory(Long categoryId) {
-        return bookRepository.findByCategoryID(categoryId);
+        return bookJdbcRepository.findByCategoryID(categoryId);
     }
 }

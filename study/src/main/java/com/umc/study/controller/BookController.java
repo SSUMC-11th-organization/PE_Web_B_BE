@@ -1,6 +1,7 @@
 // src/main/java/.../controller/BookController.java
 package com.umc.study.controller;
 
+import com.umc.study.dto.BookResponse;
 import com.umc.study.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +20,8 @@ public class BookController {
 
     // 3. HTTP GET 방식으로 /books 요청이 들어왔을 때 이 메서드가 실행됩니다.
     @GetMapping
-    public List<Map<String, Object>> getBooks() {
-        return bookService.getAllBooks();
+    public List<BookResponse> getBooks() {
+        return bookService.getBooks();
     }
 
     // 특정 카테고리 도서 목록 조회
