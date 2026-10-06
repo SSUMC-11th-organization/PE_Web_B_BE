@@ -1,37 +1,32 @@
 package com.umc.study.controller;
 
+import com.umc.study.dto.BookResponse;
+import com.umc.study.dto.CreateBookRequest;
 import com.umc.study.service.BookService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import java.util.List;
-import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
-@RestController              // 결과를 JSON으로 응답하는 컨트롤러
-@RequestMapping("/books")    // 이 클래스의 기본 주소
+import java.util.List;
+
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/books")
 public class BookController {
 
     private final BookService bookService;
 
-    @GetMapping              // GET /books
-    public List<Map<String, Object>> getBooks() {
-        return bookService.getAllBooks();   // List<Map> → JSON 배열로 자동 변환
+    // GET http://localhost:8080/books
+    @GetMapping
+    public List<BookResponse> getBooks() {
+        return bookService.getBooks();
     }
 
-    @GetMapping("/category/{categoryId}")                    // GET /books/category/1
-    public List<Map<String, Object>> getBooksByCategory(
-            @PathVariable("categoryId") Long categoryId) {   // 주소의 {categoryId} 값
-        return bookService.getBooksByCategory(categoryId);
-    }
-
-    @PostMapping                                         // POST /books
-    public String createBook(@RequestBody Map<String, Object> body) {   // JSON → Map
-        bookService.createBook(body);
-        return "도서 등록이 완료되었습니다!";
+    // POST http://localhost:8080/books
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)   // 201
+    public BookResponse createBook(@Valid @RequestBody CreateBookRequest request) {
+        return bookService.createBook(request);
     }
 }
