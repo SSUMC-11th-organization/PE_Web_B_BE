@@ -54,8 +54,8 @@ class MemberApiTests {
                 .andExpect(status().isForbidden()).andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
         mvc.perform(options("/members/1/ratings").header("Origin", "http://localhost:5173")
                 .header("Access-Control-Request-Method", "GET"))
-                .andExpect(status().isOk()).andExpect(header().string("Access-Control-Allow-Methods", "GET"));
+                .andExpect(status().isOk()).andExpect(header().string("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE"));
         mvc.perform(options("/members/1/ratings").header("Origin", "http://localhost:5173")
-                .header("Access-Control-Request-Method", "POST")).andExpect(status().isForbidden());
+                .header("Access-Control-Request-Method", "PUT")).andExpect(status().isForbidden());
     }
 }

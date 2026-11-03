@@ -1,5 +1,7 @@
 # 5주차: 화면과 API 연결
 
+6주차 필수 미션의 API 명세·Swagger 실행 순서·캡처 가이드는 [week6-mission.md](docs/week6-mission.md)를 참고하세요. 5주차 프로젝트에서 회원가입과 평점 쓰기 기능을 확장했습니다.
+
 Java 21 / Spring Boot 3.5.0 / MySQL. 기존 `study/`는 도서 대여 프로젝트로 보존하고 영화 프로젝트를 새로 생성했습니다. 저장소 README의 기존 `study/` 규칙과 이번 워크북의 새 프로젝트 요구를 함께 고려한 배치입니다.
 
 ## 1. MySQL 준비 (본인 PC에서 한 번)
