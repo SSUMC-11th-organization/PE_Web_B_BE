@@ -1,6 +1,6 @@
 spring:
   application:
-    name: "umc-study"
+    name: "umc-movie"
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
