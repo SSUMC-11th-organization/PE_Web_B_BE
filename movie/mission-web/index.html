@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UMCine · 회원과 평점</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#10121b;color:#eef0ff;font:16px/1.6 system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:40px 24px}header{margin-bottom:32px}h1{font-size:36px;letter-spacing:-1px;margin:8px 0}h2{margin:0 0 16px;font-size:22px}.tag{color:#b8a3ff;letter-spacing:2px;font-size:13px}.muted{color:#a9aec4}section{background:#1b1e2c;border:1px solid #30364b;border-radius:16px;padding:24px;margin:20px 0}label{display:block;margin:12px 0}input{background:#10121b;border:1px solid #515b79;border-radius:8px;color:white;padding:12px;font:inherit;width:min(100%,420px)}button{cursor:pointer;background:#ac91ff;color:#151125;border:0;border-radius:8px;padding:13px 18px;font:inherit;font-weight:700;margin:8px 0}button:disabled{opacity:.5}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#10121b;padding:16px;border-radius:8px;font-size:13px;min-height:60px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.grid section{margin:0}article{padding:16px;border:1px solid #414961;border-radius:8px;margin:12px 0}.score{color:#f4ce70}.request{color:#b8a3ff;overflow-wrap:anywhere;font-size:13px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+<main>
+<header><span class="tag">UMCine / WEEK 05</span><h1>취향을 나누는 영화 생활</h1><p class="muted">닉네임과 이메일을 확인하고, 회원이 남긴 영화 평점을 만나보세요.</p></header>
+<label>백엔드 주소 <input id="base" value="http://localhost:8080" aria-label="백엔드 주소"></label>
+<div class="grid">
+<section><h2>닉네임 중복 확인</h2><form id="nickname-form"><label>닉네임 <input id="nickname" value="수현" required></label><button>사용 가능 여부 확인</button></form><p id="nickname-status" role="status">아직 확인하지 않았습니다.</p><div id="nickname-url" class="request"></div><pre id="nickname-json">응답 대기</pre></section>
+<section><h2>이메일 중복 확인</h2><form id="email-form"><label>이메일 <input id="email" value="noco@umc.com" required></label><button>사용 가능 여부 확인</button></form><p id="email-status" role="status">아직 확인하지 않았습니다.</p><div id="email-url" class="request"></div><pre id="email-json">응답 대기</pre></section>
+</div>
+<section><h2>회원의 영화 평점</h2><form id="ratings-form"><label>회원 ID <input id="member" value="1" required></label><button>평점 불러오기</button></form><p id="ratings-status" role="status">아직 조회하지 않았습니다.</p><div id="ratings-url" class="request"></div><div id="rating-cards"></div><details open><summary>서버 응답 JSON</summary><pre id="ratings-json">응답 대기</pre></details></section>
+<p class="muted">회원가입과 로그인은 다음 주차에서 구현합니다. 이 화면은 실제 백엔드에 요청하며, 응답을 임의로 생성하지 않습니다.</p>
+</main>
+<script>
+const el = id => document.getElementById(id);
+async function request(kind, path, button) {
+  const url = el('base').value.trim().replace(/\/$/, '') + path;
+  el(kind + '-url').textContent = 'GET ' + url;
+  el(kind + '-status').textContent = '조회 중…';
+  el(kind + '-json').textContent = '응답 대기';
+  button.disabled = true;
+  try {
+    const response = await fetch(url);
+    const raw = await response.text();
+    let data;
+    try { data = JSON.parse(raw); } catch { data = raw; }
+    el(kind + '-json').textContent = JSON.stringify(data, null, 2);
+    if (!response.ok) {
+      el(kind + '-status').textContent = 'HTTP ' + response.status + ' · ' + (response.status === 400 ? '입력 형식을 확인해주세요.' : response.status === 404 ? '존재하지 않는 회원입니다.' : '요청을 처리하지 못했습니다.');
+      return;
+    }
+    el(kind + '-status').textContent = 'HTTP ' + response.status + ' · ' + (kind === 'ratings' ? '평점 ' + data.length + '건' : data.available ? '사용 가능합니다.' : '이미 사용 중입니다.');
+    if (kind === 'ratings') {
+      if (data.length === 0) el('rating-cards').textContent = '아직 남긴 평점이 없습니다.';
+      for (const rating of data) {
+        const card = document.createElement('article');
+        const title = document.createElement('strong');
+        title.textContent = 'TMDB 영화 #' + rating.movieId;
+        const score = document.createElement('div'); score.className = 'score';
+        score.textContent = '★'.repeat(rating.score) + ' · ' + rating.score + '/5';
+        const comment = document.createElement('p'); comment.textContent = rating.comment ?? '코멘트가 없습니다.';
+        card.append(title, score, comment); el('rating-cards').append(card);
+      }
+    }
+  } catch(error) {
+    console.error(error);
+    el(kind + '-status').textContent = '연결 실패 · 서버 실행 여부와 CORS 설정을 Console/Network에서 확인해주세요.';
+    el(kind + '-json').textContent = String(error);
+  } finally { button.disabled = false; }
+}
+for (const kind of ['nickname', 'email', 'ratings']) {
+  el(kind + '-form').addEventListener('submit', event => {
+    event.preventDefault();
+    if (kind === 'ratings') el('rating-cards').replaceChildren();
+    const path = kind === 'ratings' ? '/members/' + encodeURIComponent(el('member').value) + '/ratings' : '/members/' + kind + '/' + encodeURIComponent(el(kind).value);
+    request(kind, path, event.currentTarget.querySelector('button'));
+  });
+}
+</script>
+</html>
