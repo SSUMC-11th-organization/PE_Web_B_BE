@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: root
+    password: ${DB_PW}
+  jackson:
+    deserialization:
+      accept-float-as-int: false # 4.5 같은 소수 별점을 4로 자르지 않고 거절합니다.
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
