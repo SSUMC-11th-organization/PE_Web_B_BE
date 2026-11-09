@@ -2,12 +2,14 @@ package com.umc.study.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "rating",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "movie_id"}))
+        uniqueConstraints = @UniqueConstraint(name = "uk_rating_member_movie",
+                columnNames = {"member_id", "movie_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Rating extends BaseTimeEntity {
@@ -29,4 +31,22 @@ public class Rating extends BaseTimeEntity {
 
     @Column(columnDefinition = "TEXT")
     private String comment;
+
+    @Builder
+    public Rating(Member member, Long movieId, Integer score, String comment) {
+        this.member = member;
+        this.movieId = movieId;
+        this.score = score;
+        this.comment = comment;
+    }
+
+    // 변경 감지(dirty checking)로 트랜잭션 커밋 시 UPDATE
+    public void update(Integer score, String comment) {
+        this.score = score;
+        this.comment = comment;
+    }
+
+    public boolean isWrittenBy(Long memberId) {
+        return member.getMemberId().equals(memberId);
+    }
 }

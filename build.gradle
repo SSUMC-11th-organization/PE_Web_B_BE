@@ -34,6 +34,9 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // bcrypt 해시만 사용 (starter-security를 넣으면 모든 API가 로그인으로 막힘)
+    implementation 'org.springframework.security:spring-security-crypto'
 }
 
 tasks.named('test') {
