@@ -1,4 +1,6 @@
-# 5주차: 화면과 API 연결
+# 영화 평점 스터디 프로젝트
+
+**7주차 필수미션**: [실행·Postman 9단계·캡처 가이드](docs/week7-mission.md), [미션 기록 초안](docs/week7-record.md), [Postman 컬렉션](postman/week7.postman_collection.json). 현재 서버는 `DB_PASSWORD`와 `JWT_SECRET` 환경 변수가 필요합니다. 평점 쓰기 URL은 `/ratings`로 변경되었으며 아래 이전 주차 명세는 학습 이력입니다.
 
 6주차 필수 미션의 API 명세·Swagger 실행 순서·캡처 가이드는 [week6-mission.md](docs/week6-mission.md)를 참고하세요. 5주차 프로젝트에서 회원가입과 평점 쓰기 기능을 확장했습니다.
 

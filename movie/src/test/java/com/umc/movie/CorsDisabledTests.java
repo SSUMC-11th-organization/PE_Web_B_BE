@@ -15,6 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Sql("/test-data.sql")
 class CorsDisabledTests {
     @Autowired MockMvc mvc;
+    @Test void authenticationRemainsEnabledWithoutCors() throws Exception {
+        mvc.perform(get("/members/me")).andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH401_2"));
+    }
     @Test void returnsDataButOmitsCorsHeaderWhenDisabled() throws Exception {
         mvc.perform(get("/members/nickname/수현").header("Origin", "http://localhost:5173"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.available").value(false))

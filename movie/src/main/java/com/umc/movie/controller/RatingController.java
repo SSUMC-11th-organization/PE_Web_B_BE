@@ -1,6 +1,8 @@
 package com.umc.movie.controller;
 import com.umc.movie.dto.RatingResponse;
+import com.umc.movie.interceptor.AuthInterceptor;
 import com.umc.movie.dto.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import com.umc.movie.dto.CreateRatingRequest;
 import com.umc.movie.dto.UpdateRatingRequest;
 import jakarta.validation.Valid;
@@ -13,32 +15,33 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members")
 public class RatingController {
     private final RatingService ratingService;
-    @GetMapping("/{memberId}/ratings")
+    @GetMapping("/members/{memberId}/ratings")
     public List<RatingResponse> getMemberRatings(@PathVariable @Positive Long memberId) {
         return ratingService.getRatingsByMember(memberId);
     }
 
-    @PostMapping("/{memberId}/ratings")
-    public ResponseEntity<ApiResponse<Long>> create(@PathVariable @Positive Long memberId,
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/ratings")
+    public ResponseEntity<ApiResponse<RatingResponse>> create(@RequestAttribute(AuthInterceptor.MEMBER_ID) Long memberId,
                                                    @Valid @RequestBody CreateRatingRequest request) {
         return ResponseEntity.status(201)
                 .body(ApiResponse.created("평점 등록에 성공했습니다.", ratingService.create(memberId, request)));
     }
 
-    @PatchMapping("/{memberId}/ratings/{ratingId}")
-    public ResponseEntity<ApiResponse<Void>> update(@PathVariable @Positive Long memberId,
+    @SecurityRequirement(name = "bearerAuth")
+    @PatchMapping("/ratings/{ratingId}")
+    public ResponseEntity<ApiResponse<RatingResponse>> update(@RequestAttribute(AuthInterceptor.MEMBER_ID) Long memberId,
                                                    @PathVariable @Positive Long ratingId,
                                                    @Valid @RequestBody UpdateRatingRequest request) {
-        ratingService.update(ratingId, memberId, request);
-        return ResponseEntity.ok(ApiResponse.ok("평점 수정에 성공했습니다.", null));
+        return ResponseEntity.ok(ApiResponse.ok("평점 수정에 성공했습니다.", ratingService.update(memberId, ratingId, request)));
     }
 
-    @DeleteMapping("/{memberId}/ratings/{ratingId}")
-    public ResponseEntity<Void> delete(@PathVariable @Positive Long memberId, @PathVariable @Positive Long ratingId) {
-        ratingService.delete(ratingId, memberId);
-        return ResponseEntity.noContent().build();
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/ratings/{ratingId}")
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestAttribute(AuthInterceptor.MEMBER_ID) Long memberId, @PathVariable @Positive Long ratingId) {
+        ratingService.delete(memberId, ratingId);
+        return ResponseEntity.ok(ApiResponse.ok("평점을 삭제했습니다.", null));
     }
 }
