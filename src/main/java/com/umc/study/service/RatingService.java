@@ -15,6 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * [7주차] memberId는 이제 클라이언트가 아니라 토큰(인터셉터)에서 옵니다.
+ * "누가"가 모든 동작의 주어이므로 인자 순서를 (memberId, ...)로 통일했습니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class RatingService {
@@ -22,7 +26,7 @@ public class RatingService {
     private final RatingRepository ratingRepository;
     private final MemberRepository memberRepository;
 
-    // [5주차] 유저별 평점 조회: 없는 유저면 404
+    // [5주차] 유저별 평점 조회 (공개): 없는 유저면 404
     @Transactional(readOnly = true)
     public List<RatingResponse> getRatingsByMember(Long memberId) {
         if (!memberRepository.existsById(memberId)) {
@@ -33,9 +37,9 @@ public class RatingService {
                 .toList();
     }
 
-    // [6주차] 평점 등록
+    // 평점 등록 (7주차부터 RatingResponse 전체를 반환)
     @Transactional
-    public Long create(Long memberId, CreateRatingRequest request) {
+    public RatingResponse create(Long memberId, CreateRatingRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -52,27 +56,31 @@ public class RatingService {
                 .comment(request.comment())
                 .build();
 
-        return ratingRepository.save(rating).getRatingId();
+        return RatingResponse.from(ratingRepository.save(rating));
     }
 
-    // [6주차] 평점 수정
+    // 평점 수정 (7주차부터 수정된 RatingResponse를 반환)
     @Transactional
-    public void update(Long ratingId, Long memberId, UpdateRatingRequest request) {
-        Rating rating = findOwnedRating(ratingId, memberId);
-        rating.update(request.score(), request.comment());   // 변경 감지로 UPDATE
+    public RatingResponse update(Long memberId, Long ratingId, UpdateRatingRequest request) {
+        Rating rating = findOwnedRating(memberId, ratingId);
+        rating.update(request.score(), request.comment());
+        ratingRepository.flush();   // UPDATE를 먼저 실행해 갱신된 updatedAt을 응답에 담습니다
+        return RatingResponse.from(rating);
     }
 
-    // [6주차] 평점 삭제
+    // 평점 삭제
     @Transactional
-    public void delete(Long ratingId, Long memberId) {
-        Rating rating = findOwnedRating(ratingId, memberId);
+    public void delete(Long memberId, Long ratingId) {
+        Rating rating = findOwnedRating(memberId, ratingId);
         ratingRepository.delete(rating);
     }
 
     /**
      * 평점을 찾고(없으면 404), 요청자의 것인지 확인합니다(아니면 403).
+     * 순서가 중요합니다: 존재하지 않는 평점에 "권한 없음"이라고 답하면 앞뒤가 맞지 않습니다.
+     * 인증(누구인가)은 인터셉터가, 인가(네 것인가)는 DB를 봐야 아는 서비스가 담당합니다.
      */
-    private Rating findOwnedRating(Long ratingId, Long memberId) {
+    private Rating findOwnedRating(Long memberId, Long ratingId) {
         Rating rating = ratingRepository.findById(ratingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
 
