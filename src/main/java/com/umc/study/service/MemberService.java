@@ -3,7 +3,9 @@ package com.umc.study.service;
 import com.umc.study.apiPayload.code.ErrorCode;
 import com.umc.study.apiPayload.exception.CustomException;
 import com.umc.study.dto.EmailCheckResponse;
+import com.umc.study.dto.MemberInfoResponse;
 import com.umc.study.dto.MemberResponse;
+import com.umc.study.dto.MemberUpdateRequest;
 import com.umc.study.dto.NicknameCheckResponse;
 import com.umc.study.dto.SignUpRequest;
 import com.umc.study.entity.Member;
@@ -55,5 +57,33 @@ public class MemberService {
 
         // 4. password를 뺀 DTO로 반환
         return MemberResponse.from(savedMember);
+    }
+
+    // [7주차] 내 정보 조회
+    @Transactional(readOnly = true)
+    public MemberInfoResponse getMyInfo(Long memberId) {
+        return MemberInfoResponse.from(findMember(memberId));
+    }
+
+    // [7주차] 내 정보 수정 (닉네임)
+    @Transactional
+    public MemberInfoResponse updateMyInfo(Long memberId, MemberUpdateRequest request) {
+        Member member = findMember(memberId);
+
+        // 나 자신이 쓰는 닉네임은 중복이 아닙니다. 나를 제외한 다른 회원만 확인합니다.
+        // (동시 요청은 DB UNIQUE 제약 → GlobalExceptionHandler가 MEMBER409_1로 응답)
+        if (memberRepository.existsByNicknameAndMemberIdNot(request.nickname(), memberId)) {
+            throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        member.updateNickname(request.nickname());
+        memberRepository.saveAndFlush(member);   // 제약 위반을 트랜잭션 안에서 바로 드러내기 위해 flush
+        return MemberInfoResponse.from(member);
+    }
+
+    private Member findMember(Long memberId) {
+        // 토큰은 유효하지만 그 사이 회원이 삭제된 경우
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }

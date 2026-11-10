@@ -37,6 +37,11 @@ dependencies {
 
     // bcrypt 해시만 사용 (starter-security를 넣으면 모든 API가 로그인으로 막힘)
     implementation 'org.springframework.security:spring-security-crypto'
+
+    // [7주차] JWT 생성/검증 라이브러리
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 }
 
 tasks.named('test') {

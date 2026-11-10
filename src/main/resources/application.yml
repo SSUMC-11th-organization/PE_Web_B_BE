@@ -13,3 +13,7 @@ spring:
       ddl-auto: validate
     open-in-view: false
     show-sql: true
+
+jwt:
+  secret: ${JWT_SECRET}                        # 서명용 비밀키 (32자 이상, 코드/깃허브에 올리지 않음)
+  access-expiration: ${JWT_ACCESS_EXPIRATION}  # Access Token 유효시간(초)
