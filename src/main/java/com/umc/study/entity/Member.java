@@ -2,6 +2,7 @@ package com.umc.study.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,12 +20,13 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false, unique = true, length = 254)
     private String email;
 
-    @Column(nullable = false, length = 60)              // bcrypt 해시 (6주차)
+    @Column(nullable = false, length = 60)              // bcrypt 해시는 항상 60자
     private String password;
 
     @Column(nullable = false, unique = true, length = 50)
     private String nickname;
 
+    @Builder
     public Member(String email, String password, String nickname) {
         this.email = email;
         this.password = password;
