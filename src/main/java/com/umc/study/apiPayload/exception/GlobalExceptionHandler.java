@@ -65,6 +65,8 @@ public class GlobalExceptionHandler {
             errorCode = ErrorCode.DUPLICATE_NICKNAME;
         } else if (key.endsWith("uk_rating_member_movie")) {
             errorCode = ErrorCode.DUPLICATE_RATING;
+        } else if (key.endsWith("uk_favorite_member_movie")) {
+            errorCode = ErrorCode.DUPLICATE_FAVORITE;
         } else {
             errorCode = ErrorCode.DUPLICATE_DATA;
         }

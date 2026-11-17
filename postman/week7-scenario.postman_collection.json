@@ -1,0 +1,134 @@
+{
+  "info": {
+    "name": "7주차 JWT 시나리오",
+    "description": "위에서부터 순서대로 Send 하세요. 토큰/평점 ID는 자동으로 변수에 저장됩니다.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "tokenA", "value": "" },
+    { "key": "tokenB", "value": "" },
+    { "key": "ratingId", "value": "" },
+    { "key": "movieId", "value": "680" }
+  ],
+  "item": [
+    {
+      "name": "1. 회원가입 A (이미 있으면 409, 무시)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"umc@example.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"moviefan\"\n}" },
+        "url": "{{baseUrl}}/members"
+      }
+    },
+    {
+      "name": "2. 회원가입 B (이미 있으면 409, 무시)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"other@example.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"otheruser\"\n}" },
+        "url": "{{baseUrl}}/members"
+      }
+    },
+    {
+      "name": "3. 로그인 A  ★제출물 1",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "const t = pm.response.json().result?.accessToken;",
+          "if (t) pm.collectionVariables.set('tokenA', t);"
+        ] }
+      }],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"umc@example.com\",\n  \"password\": \"Umc!1234\"\n}" },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "4. 로그인 B",
+      "event": [{
+        "listen": "test",
+        "script": { "type": "text/javascript", "exec": [
+          "const t = pm.response.json().result?.accessToken;",
+          "if (t) pm.collectionVariables.set('tokenB', t);"
+        ] }
+      }],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"other@example.com\",\n  \"password\": \"Umc!1234\"\n}" },
+        "url": "{{baseUrl}}/auth/login"
+      }
+    },
+    {
+      "name": "5. 토큰 없이 내 정보 조회 → 401  ★제출물 2",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/members/me"
+      }
+    },
+    {
+      "name": "6. 토큰 A로 내 정보 조회 → 200",
+      "request": {
+        "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/members/me"
+      }
+    },
+    {
+      "name": "7. 토큰 A로 평점 등록 → 201  ★제출물 4",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": { "type": "text/javascript", "exec": [
+            "// 같은 영화에 두 번 등록하면 409라서, 실행할 때마다 다른 영화 ID를 씁니다",
+            "pm.collectionVariables.set('movieId', String(Date.now() % 1000000 + 1000));"
+          ] }
+        },
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "const id = pm.response.json().result?.ratingId;",
+            "if (id) pm.collectionVariables.set('ratingId', String(id));"
+          ] }
+        }
+      ],
+      "request": {
+        "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"movieId\": {{movieId}},\n  \"score\": 5,\n  \"comment\": \"인생 영화\"\n}" },
+        "url": "{{baseUrl}}/ratings"
+      }
+    },
+    {
+      "name": "8. 토큰 B로 A의 평점 수정 → 403  ★제출물 3",
+      "request": {
+        "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenB}}", "type": "string" }] },
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"score\": 1,\n  \"comment\": \"남의 평점 수정 시도\"\n}" },
+        "url": "{{baseUrl}}/ratings/{{ratingId}}"
+      }
+    },
+    {
+      "name": "9. 토큰 A로 본인 평점 수정 → 200",
+      "request": {
+        "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenA}}", "type": "string" }] },
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"score\": 4,\n  \"comment\": \"다시 보니 4점\"\n}" },
+        "url": "{{baseUrl}}/ratings/{{ratingId}}"
+      }
+    }
+  ]
+}
