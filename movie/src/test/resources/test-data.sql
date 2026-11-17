@@ -1,3 +1,4 @@
+DELETE FROM favorite;
 DELETE FROM rating;
 DELETE FROM member;
 INSERT INTO member (member_id, email, password, nickname, created_at, updated_at) VALUES
