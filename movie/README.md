@@ -1,5 +1,19 @@
 # 영화 평점 스터디 프로젝트
 
+## 9주차: Swagger 문서와 테스트
+
+Swagger 화면은 `/swagger-ui/index.html`, OpenAPI JSON은 `/v3/api-docs`입니다. 공개 API에는 자물쇠가 없고, 인증 API는 Authorize에 JWT 값만 입력해 실행합니다. 각 API에 설명·성공 응답·실패 상태와 code 예시를 추가했습니다.
+
+`movie/`에서 다음 명령으로 단위 테스트와 통합 테스트를 각각 실행할 수 있습니다. `Week9ApiTest`는 테스트 전용 H2를 사용하므로 MySQL 실행이나 실제 DB 비밀번호가 필요하지 않습니다.
+
+```powershell
+.\gradlew.bat test --tests '*FavoriteServiceTest' --tests '*RatingServiceTest'
+.\gradlew.bat test --tests '*Week9ApiTest'
+.\gradlew.bat clean build
+```
+
+테스트 전체 통과, Swagger 문서·실제 응답, 중복 검사 제거 시 실패한 화면은 직접 캡처해 미션에 기록합니다. 일부러 제거한 중복 검사는 캡처 후 반드시 복구합니다.
+
 **8주차 필수미션**: [서버 실행·Swagger 실습·캡처 가이드](docs/week8-mission.md). 즐겨찾기 API 4개와 트랜잭션 기반 영화 기록 저장 API를 추가했습니다.
 
 **7주차 필수미션**: [실행·Postman 9단계·캡처 가이드](docs/week7-mission.md), [미션 기록 초안](docs/week7-record.md), [Postman 컬렉션](postman/week7.postman_collection.json). 현재 서버는 `DB_PASSWORD`와 `JWT_SECRET` 환경 변수가 필요합니다. 평점 쓰기 URL은 `/ratings`로 변경되었으며 아래 이전 주차 명세는 학습 이력입니다.
