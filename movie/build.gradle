@@ -34,6 +34,14 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6' // JWT
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+	// Swagger(OpenAPI) 문서 자동 생성 + Swagger UI 화면
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'com.h2database:h2' // 테스트에서만 쓰는 메모리 DB
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 }
 
 tasks.named('test') {
