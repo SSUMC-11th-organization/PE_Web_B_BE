@@ -1,0 +1,19 @@
+# [9주차] 테스트 전용 설정 (src/main/resources/application.yml 대신 이 값이 쓰입니다)
+# 개발용 MySQL 대신, 테스트가 돌 때만 메모리 위에 만들어졌다 사라지는 H2를 씁니다.
+spring:
+  datasource:
+    url: jdbc:h2:mem:umc_movie;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      # 테스트마다 메모리 DB의 스키마를 새로 만들어 엔티티 매핑도 함께 검증합니다.
+      ddl-auto: create-drop
+    open-in-view: false
+    show-sql: false
+
+# 이 값이 없으면 JwtUtil이 만들어지지 못해 테스트가 시작도 못 합니다. (HMAC 키는 32바이트 이상)
+jwt:
+  secret: test-secret-for-context-loading-only-0123456789
+  access-expiration: 3600
