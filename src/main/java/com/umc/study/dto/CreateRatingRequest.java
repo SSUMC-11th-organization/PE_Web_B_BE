@@ -13,13 +13,13 @@ public record CreateRatingRequest(
         @Positive(message = "영화 ID는 양수여야 합니다.")
         Long movieId,
 
-        @Schema(example = "5")
+        @Schema(description = "별점 (1~5)", example = "5")
         @NotNull(message = "별점을 입력해주세요.")
         @Min(value = 1, message = "별점은 1점 이상이어야 합니다.")
         @Max(value = 5, message = "별점은 5점 이하여야 합니다.")
         Integer score,
 
-        @Schema(example = "인생 영화")
+        @Schema(description = "한 줄 후기 (500자 이하, 생략 가능)", example = "인생 영화")
         @Size(max = 500, message = "후기는 500자 이하로 입력해주세요.")
         String comment
 ) {}

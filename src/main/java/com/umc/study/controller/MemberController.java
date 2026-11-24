@@ -20,7 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Member", description = "회원 API")
+@Tag(name = "Member", description = "회원가입과 내 정보 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members")
@@ -30,7 +30,9 @@ public class MemberController {
 
     // GET http://localhost:8080/members/me  (Authorization: Bearer {token})
     // 고정 경로(/me)는 변수 경로(/{memberId})보다 위에 둡니다
-    @Operation(summary = "내 정보 조회", description = "200 성공 / 401 토큰 없음·위조·만료(AUTH401_2~4) / 404 회원 없음")
+    @Operation(summary = "내 정보 조회",
+            description = "🔒 토큰 필요. 토큰의 주인인 회원의 이메일·닉네임·가입일을 조회합니다.<br>"
+                    + "200 성공 / 401 토큰 없음·위조·만료(AUTH401_2·AUTH401_3·AUTH401_4) / 404 회원 없음(MEMBER404_1)")
     @SecurityRequirement(name = SwaggerConfig.BEARER_AUTH)
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<MemberInfoResponse>> getMyInfo(
@@ -40,7 +42,9 @@ public class MemberController {
     }
 
     // PATCH http://localhost:8080/members/me  (Authorization: Bearer {token})
-    @Operation(summary = "내 정보 수정", description = "200 성공 / 400 입력 검증 실패 / 401 인증 실패 / 409 닉네임 중복(MEMBER409_1)")
+    @Operation(summary = "내 정보 수정",
+            description = "🔒 토큰 필요. 내 닉네임을 변경합니다.<br>"
+                    + "200 성공 / 400 입력 검증 실패(COMMON4001) / 401 인증 실패(AUTH401_2·AUTH401_3·AUTH401_4) / 409 닉네임 중복(MEMBER409_1)")
     @SecurityRequirement(name = SwaggerConfig.BEARER_AUTH)
     @PatchMapping("/me")
     public ResponseEntity<ApiResponse<MemberInfoResponse>> updateMyInfo(
@@ -51,7 +55,7 @@ public class MemberController {
     }
 
     // GET http://localhost:8080/members/nickname/{nickname}
-    @Operation(summary = "닉네임 중복 체크", description = "사용 가능하면 available: true")
+    @Operation(summary = "닉네임 중복 체크", description = "🔓 공개 API. 사용 가능하면 available: true")
     @GetMapping("/nickname/{nickname}")
     public NicknameCheckResponse checkNickname(
             @Parameter(description = "확인할 닉네임", example = "수현") @PathVariable String nickname) {
@@ -59,7 +63,7 @@ public class MemberController {
     }
 
     // GET http://localhost:8080/members/email/{email}
-    @Operation(summary = "이메일 중복 체크", description = "사용 가능하면 available: true")
+    @Operation(summary = "이메일 중복 체크", description = "🔓 공개 API. 사용 가능하면 available: true")
     @GetMapping("/email/{email}")
     public EmailCheckResponse checkEmail(
             @Parameter(description = "확인할 이메일", example = "noco@umc.com") @PathVariable String email) {
@@ -68,7 +72,8 @@ public class MemberController {
 
     // POST http://localhost:8080/members
     @Operation(summary = "회원가입",
-            description = "201 성공 / 400 입력 검증 실패(COMMON4001) / 409 닉네임 중복(MEMBER409_1)·이메일 중복(MEMBER409_2)")
+            description = "🔓 공개 API. 이메일, 비밀번호, 닉네임으로 회원을 등록합니다. 토큰이 없어도 호출할 수 있습니다.<br>"
+                    + "201 성공 / 400 입력 검증 실패(COMMON4001) / 409 닉네임 중복(MEMBER409_1)·이메일 중복(MEMBER409_2)")
     @PostMapping
     public ResponseEntity<ApiResponse<MemberResponse>> signUp(@Valid @RequestBody SignUpRequest request) {
         MemberResponse response = memberService.signUp(request);
